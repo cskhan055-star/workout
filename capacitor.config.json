@@ -1,0 +1,8 @@
+{
+  "appId": "com.homeworkout.noequipment",
+  "appName": "Home Workout",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

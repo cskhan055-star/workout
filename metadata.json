@@ -1,0 +1,6 @@
+{
+  "name": "Home Workout - No Equipment",
+  "description": "Zero-equipment home workout app with guided routines, animated exercise demos, audio cues, rest timers, and streak progress tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
