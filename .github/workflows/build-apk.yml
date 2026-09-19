@@ -18,8 +18,25 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Install Dependencies & Capacitor
+        run: |
+          npm install
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+
+      - name: Ensure Capacitor Config
+        run: |
+          if [ ! -f "capacitor.config.json" ]; then
+            cat << 'EOF' > capacitor.config.json
+            {
+              "appId": "com.homeworkout.noequipment",
+              "appName": "Home Workout",
+              "webDir": "dist",
+              "server": {
+                "androidScheme": "https"
+              }
+            }
+          EOF
+          fi
 
       - name: Build Web Application
         run: npm run build
@@ -33,23 +50,25 @@ jobs:
       - name: Accept Android SDK Licenses & Setup Platform
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0" || true
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35" "build-tools;35.0.0" || true
 
       - name: Sync Capacitor Android
         run: |
           npx cap add android || true
-          sed -i 's/compileSdkVersion = 36/compileSdkVersion = 35/g' android/variables.gradle || true
-          sed -i 's/targetSdkVersion = 36/targetSdkVersion = 35/g' android/variables.gradle || true
+          if [ -f "android/variables.gradle" ]; then
+            sed -i 's/compileSdkVersion = 36/compileSdkVersion = 35/g' android/variables.gradle
+            sed -i 's/targetSdkVersion = 36/targetSdkVersion = 35/g' android/variables.gradle
+          fi
           npx cap sync android
 
       - name: Build Android Debug APK
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: HomeWorkout-Debug-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/*.apk
